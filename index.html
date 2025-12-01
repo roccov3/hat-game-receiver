@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hat Game Receiver</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      overflow: hidden;
+    }
+    #media-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+    }
+    #
+overlay-image {
+      position: absolute;
+      /* Default values, will be updated by JavaScript */
+      top: 50%;
+      left: 50%;
+      width: 15%; /* Use percentage for responsive sizing */
+      transform: translate(-50%, -50%) rotate(0 deg) scale(1);
+      display: none; /* Hidden by default */
+    }</style>
+</head>
+<body>
+  <!-- Cast SDK and Media Player Library -->
+  <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+  <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/mediaplayer/v1/media_player.js"></script>
+
+  <div id="media-container">
+    <cast-media-player></cast-media-player>
+    <img id="overlay-image" />
+  </div>
+
+  <script>
+    // --- JavaScript for the Receiver ---
+    const context = cast.framework.CastReceiverContext.getInstance();
+    const playerManager = context.getPlayerManager();
+    const overlayImage = document.getElementById('overlay-image');
+
+    // 1. Intercept LOAD requests to get custom data
+    playerManager.
+setMessageInterceptor(
+      cast.framework.messages.MessageType.LOAD,
+      loadRequest => {
+        if (loadRequest.media && loadRequest.media.customData) {
+          const customData = loadRequest.media.customData;
+
+          // Update overlay based on data from the Android app
+          if (customData.overlayUrl) {
+            
+overlayImage.src = customData.overlayUrl;
+            overlayImage.style.display = 'block';          }
+        }
+        return loadRequest;
+      }
+    );
+
+    // 2. Create a custom namespace to receive real-time updates
+    const CUSTOM_NAMESPACE = 'urn:x-cast:com.example.hatgameapp.custom';
+    context.addCustomMessageListener(CUSTOM_NAMESPACE, (customEvent) => {
+      const data = customEvent.data;
+      if (data.type === 'UPDATE_OVERLAY') {
+        const x = data.x
+; // Percentage value from 0.0 to 1.0const y = data.y; // Percentage value from 0.0 to 1.0
+        const scale = data.scale;
+        const rotation = data.rotation;
+
+        // Convert percentage to vw/vh and apply transforms
+        overlayImage.style.left = `${x * 100}vw`;
+        overlayImage.style.top = `${y * 100}vh`;
+        overlayImage.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(${scale})`;
+      }
+    });
+
+    // 3. Start the receiver
+    context.start();
+  </script>
+</body>
+</html>
