@@ -20,21 +20,20 @@
       width: 100%;
       height: 100%;
     }
-    #
-overlay-image {
+    #overlay-image {
       position: absolute;
-      /* Default values, will be updated by JavaScript */
       top: 50%;
       left: 50%;
-      width: 15%; /* Use percentage for responsive sizing */
-      transform: translate(-50%, -50%) rotate(0 deg) scale(1);
-      display: none; /* Hidden by default */
-    }</style>
+      width: 15vw;
+      display: none; 
+      transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    }
+  </style>
 </head>
 <body>
-  <!-- Cast SDK and Media Player Library -->
-  <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
-  <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/mediaplayer/v1/media_player.js"></script>
+  <!-- FIX: The script URLs now explicitly use https:// -->
+  <script type="text/javascript" src="https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+  <script type="text/javascript" src="https://www.gstatic.com/cast/sdk/libs/mediaplayer/v1/media_player.js"></script>
 
   <div id="media-container">
     <cast-media-player></cast-media-player>
@@ -42,47 +41,47 @@ overlay-image {
   </div>
 
   <script>
-    // --- JavaScript for the Receiver ---
     const context = cast.framework.CastReceiverContext.getInstance();
     const playerManager = context.getPlayerManager();
     const overlayImage = document.getElementById('overlay-image');
+    const CUSTOM_NAMESPACE = 'urn:x-cast:com.example.hatgameapp.custom';
 
-    // 1. Intercept LOAD requests to get custom data
-    playerManager.
-setMessageInterceptor(
-      cast.framework.messages.MessageType.LOAD,
-      loadRequest => {
+    // All configuration must happen inside the 'READY' event listener.
+    context.addEventListener(cast.framework.events.EventType.READY, () => {
+      console.log('Cast Receiver is READY.');
+
+      // Now that the receiver is ready, we can safely set up our handlers.
+      playerManager.setMediaInformationHandler((loadRequest) => {
+        console.log('Intercepting LOAD request.');
         if (loadRequest.media && loadRequest.media.customData) {
           const customData = loadRequest.media.customData;
-
-          // Update overlay based on data from the Android app
           if (customData.overlayUrl) {
-            
-overlayImage.src = customData.overlayUrl;
-            overlayImage.style.display = 'block';          }
+            overlayImage.src = customData.overlayUrl;
+            overlayImage.style.display = 'block';
+          } else {
+            overlayImage.style.display = 'none';
+          }
         }
         return loadRequest;
-      }
-    );
+      });
 
-    // 2. Create a custom namespace to receive real-time updates
-    const CUSTOM_NAMESPACE = 'urn:x-cast:com.example.hatgameapp.custom';
-    context.addCustomMessageListener(CUSTOM_NAMESPACE, (customEvent) => {
-      const data = customEvent.data;
-      if (data.type === 'UPDATE_OVERLAY') {
-        const x = data.x
-; // Percentage value from 0.0 to 1.0const y = data.y; // Percentage value from 0.0 to 1.0
-        const scale = data.scale;
-        const rotation = data.rotation;
+      context.addCustomMessageListener(CUSTOM_NAMESPACE, (customEvent) => {
+        const data = customEvent.data;
+        if (data.type === 'UPDATE_OVERLAY') {
+          console.log('Received UPDATE_OVERLAY message:', data);
+          const x = data.x;
+          const y = data.y;
+          const scale = data.scale;
+          const rotation = data.rotation;
 
-        // Convert percentage to vw/vh and apply transforms
-        overlayImage.style.left = `${x * 100}vw`;
-        overlayImage.style.top = `${y * 100}vh`;
-        overlayImage.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(${scale})`;
-      }
+          overlayImage.style.left = `${x * 100}vw`;
+          overlayImage.style.top = `${y * 100}vh`;
+          overlayImage.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(${scale})`;
+        }
+      });
     });
 
-    // 3. Start the receiver
+    // Start the receiver context. This will eventually fire the 'READY' event.
     context.start();
   </script>
 </body>
