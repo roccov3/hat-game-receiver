@@ -25,13 +25,12 @@
       top: 50%;
       left: 50%;
       width: 15vw;
-      display: none; 
+      display: none;
       transform: translate(-50%, -50%) rotate(0deg) scale(1);
     }
   </style>
 </head>
 <body>
-  <!-- FIX: The script URLs now explicitly use https:// -->
   <script type="text/javascript" src="https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
   <script type="text/javascript" src="https://www.gstatic.com/cast/sdk/libs/mediaplayer/v1/media_player.js"></script>
 
@@ -46,11 +45,9 @@
     const overlayImage = document.getElementById('overlay-image');
     const CUSTOM_NAMESPACE = 'urn:x-cast:com.example.hatgameapp.custom';
 
-    // All configuration must happen inside the 'READY' event listener.
     context.addEventListener(cast.framework.events.EventType.READY, () => {
       console.log('Cast Receiver is READY.');
 
-      // Now that the receiver is ready, we can safely set up our handlers.
       playerManager.setMediaInformationHandler((loadRequest) => {
         console.log('Intercepting LOAD request.');
         if (loadRequest.media && loadRequest.media.customData) {
@@ -81,8 +78,13 @@
       });
     });
 
-    // Start the receiver context. This will eventually fire the 'READY' event.
-    context.start();
+    // FIX: Define explicit start-up options
+    const options = new cast.framework.CastReceiverOptions();
+    // We are telling the SDK that we will handle all media commands ourselves.
+    options.disableMediaCommands = true;
+
+    // Start the receiver context with our defined options
+    context.start(options);
   </script>
 </body>
 </html>
