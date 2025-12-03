@@ -45,6 +45,9 @@
     const overlayImage = document.getElementById('overlay-image');
     const CUSTOM_NAMESPACE = 'urn:x-cast:com.example.hatgameapp.custom';
 
+    const castReceiverOptions = new cast.framework.CastReceiverOptions();
+    castReceiverOptions.applicationId = "387E8D8C";
+
     context.addEventListener(cast.framework.events.EventType.READY, () => {
       console.log('Cast Receiver is READY.');
 
@@ -78,13 +81,8 @@
       });
     });
 
-    // FIX: Define explicit start-up options
-    const options = new cast.framework.CastReceiverOptions();
-    // We are telling the SDK that we will handle all media commands ourselves.
-    options.disableMediaCommands = true;
-
-    // Start the receiver context with our defined options
-    context.start(options);
+    // FIX: Simplified the start-up call to its most basic and robust form.
+    context.start(castReceiverOptions);
   </script>
 </body>
 </html>
