@@ -84,6 +84,11 @@
       });
     });
 
+    context.addEventListener(cast.framework.events.EventType.SENDER_DISCONNECTED, () => {
+      console.log('Sender disconnected.');
+      // Optionally, reset the overlay or media player here
+    });
+
     // Enable verbose logging for debugging
     cast.framework.setLoggerLevel(cast.framework.LoggerLevel.DEBUG);
 
