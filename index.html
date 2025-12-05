@@ -35,7 +35,9 @@
   <script type="text/javascript" src="https://www.gstatic.com/cast/sdk/libs/mediaplayer/v1/media_player.js"></script>
 
   <div id="media-container">
-    <cast-media-player></cast-media-player>
+    <cast-media-player
+      supported-commands="pause,play,stream_volume,stream_mute"
+    ></cast-media-player>
     <img id="overlay-image" />
   </div>
 
@@ -46,7 +48,8 @@
     const CUSTOM_NAMESPACE = 'urn:x-cast:com.example.hatgameapp.custom';
 
     const castReceiverOptions = new cast.framework.CastReceiverOptions();
-    castReceiverOptions.applicationId = "387E8D8C";
+    castReceiverOptions.disableIdleTimeout = true;
+    castReceiverOptions.supportedCommands = cast.framework.messages.Command.ALL_BASIC_MEDIA;
 
     context.addEventListener(cast.framework.events.EventType.READY, () => {
       console.log('Cast Receiver is READY.');
@@ -81,7 +84,9 @@
       });
     });
 
-    // FIX: Simplified the start-up call to its most basic and robust form.
+    // Enable verbose logging for debugging
+    cast.framework.setLoggerLevel(cast.framework.LoggerLevel.DEBUG);
+
     context.start(castReceiverOptions);
   </script>
 </body>
