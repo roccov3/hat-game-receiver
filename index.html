@@ -51,6 +51,10 @@
     castReceiverOptions.disableIdleTimeout = true;
     castReceiverOptions.supportedCommands = cast.framework.messages.Command.ALL_BASIC_MEDIA;
 
+    // ✅ **Declare support for the custom namespace**
+    castReceiverOptions.customNamespaces = {};
+    castReceiverOptions.customNamespaces[CUSTOM_NAMESPACE] = cast.framework.system.MessageType.JSON;
+
     context.addEventListener(cast.framework.events.EventType.READY, () => {
       console.log('Cast Receiver is READY.');
 
